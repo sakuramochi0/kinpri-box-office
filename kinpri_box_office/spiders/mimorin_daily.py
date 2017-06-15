@@ -63,5 +63,5 @@ class MimorinDailySpider(scrapy.Spider):
             if ratio_string:
                 item['ratio_last_week'] = float(ratio_string) / 100
             item['title'] = title
-            item['date'] = date
+            item['_id'] = date
             yield item
