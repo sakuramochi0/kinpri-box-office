@@ -23,7 +23,7 @@ class KoreaSpider(scrapy.Spider):
                     if col_num == 9:
                         date = row.css('td:nth-child(2) ::text').extract_first()
                         sell = row.css('td:nth-child(3) ::text').extract_first()
-                        box_office = row.css('td:nth-child(7) ::text').extract_first()
+                        box_office = row.css('td:nth-child(6) ::text').extract_first()
                     # other dates
                     elif col_num == 4:
                         date = row.css('td:nth-child(1) ::text').extract_first()
