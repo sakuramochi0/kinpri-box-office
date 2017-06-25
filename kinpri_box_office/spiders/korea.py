@@ -33,8 +33,8 @@ class KoreaSpider(scrapy.Spider):
                     if '-' in sell:
                         continue
                     date = parse(re.search(r'\d{4}-\d{2}-\d{2}', date).group(0))
-                    sell = re.search(r'[\d,]+', sell).group(0).replace(',', '')
-                    box_office = re.search(r'[\d,]+', box_office).group(0).replace(',', '')
+                    sell = int(re.search(r'[\d,]+', sell).group(0).replace(',', ''))
+                    box_office = int(re.search(r'[\d,]+', box_office).group(0).replace(',', ''))
                     yield dict(
                         _id=date,
                         sell=sell,
