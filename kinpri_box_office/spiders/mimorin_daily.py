@@ -86,6 +86,7 @@ class MimorinDailySpider(scrapy.Spider):
                 rank, total_seat, show_num, theater_num = map(int, int_list)
                 item = dict(
                     rank=rank,
+                    sell=0,
                     total_seat=total_seat,
                     show_num=show_num,
                     theater_num=theater_num,
