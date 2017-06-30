@@ -30,12 +30,21 @@ class MimorinDailySpider(scrapy.Spider):
                 yield scrapy.Request(
                     url=entry.css('a::attr(href)').extract_first(),
                     callback=self.parse_entry,
+                    meta={'type': 'daily_final'},
+                )
+
+            if '前日集計' in title:
+                yield scrapy.Request(
+                    url=entry.css('a::attr(href)').extract_first(),
+                    callback=self.parse_entry,
+                    meta={'type': 'previous_day_gross'},
                 )
 
         next_url = response.css('link[rel="next"]::attr(href)').extract_first()
         yield response.request.replace(url=next_url)
 
     def parse_entry(self, response):
+        entry_type = response.meta['type']
         date = parse(response.css('.entry_header::text').re(r'\d+')[0])
         lines = response.css('.entry_body::text').extract()
         # filter empty lines
@@ -47,21 +56,43 @@ class MimorinDailySpider(scrapy.Spider):
         # convert string to int
         new_lines = []
         for line in lines:
-            title = normalize(' '.join(line[6:]))
-            if not is_kinpri(title):
+            if entry_type == 'daily_final':
+                title = normalize(' '.join(line[6:]))
+                if not is_kinpri(title):
+                    continue
+
+                # remove '*' from number strings
+                int_list = map(int, map(lambda x: x.replace('*', ''), line[:5]))
+                rank, sell, total_seat, show_num, theater_num = map(int, int_list)
+                item = dict(
+                    rank=rank,
+                    sell=sell,
+                    total_seat=total_seat,
+                    show_num=show_num,
+                    theater_num=theater_num,
+                    final_result=True,
+                )
+                ratio_string = line[5].replace('*', '').replace('%', '')
+                if ratio_string:
+                    item['ratio_last_week'] = float(ratio_string) / 100
+            elif entry_type == 'previous_day_gross':
+                title = normalize(' '.join(line[7:]))
+                if not is_kinpri(title):
+                    continue
+
+                # remove '*' from number strings
+                int_list = map(int, map(lambda x: x.replace('*', ''),
+                                        line[:3] + line[4:5]))
+                rank, total_seat, show_num, theater_num = map(int, int_list)
+                item = dict(
+                    rank=rank,
+                    total_seat=total_seat,
+                    show_num=show_num,
+                    theater_num=theater_num,
+                    final_result=False,
+                )
+            else:
                 continue
-            int_list = map(int, map(lambda x: x.replace('*', ''), line[:5]))
-            rank, sell, total_seat, show_num, theater_num = map(int, int_list)
-            item = dict(
-                rank=rank,
-                sell=sell,
-                total_seat=total_seat,
-                show_num=show_num,
-                theater_num=theater_num,
-            )
-            ratio_string = line[5].replace('*', '').replace('%', '')
-            if ratio_string:
-                item['ratio_last_week'] = float(ratio_string) / 100
             item['title'] = title
             item['_id'] = date
             yield item
