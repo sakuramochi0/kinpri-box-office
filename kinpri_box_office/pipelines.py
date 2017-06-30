@@ -13,9 +13,9 @@ class KinpriBoxOfficePipeline(object):
     db = cli.kinpri_box_office
 
     def process_item(self, item, spider):
-        if not self.db[spider.name].find_one({
-                'date': item['_id'],
-                'final_result': True
+        if self.db[spider.name].find_one({
+                '_id': item['_id'],
+                'final_result': False
         }):
             self.db[spider.name].update_one(
                 {'_id': item['_id']},
