@@ -13,10 +13,11 @@ class KinpriBoxOfficePipeline(object):
     db = cli.kinpri_box_office
 
     def process_item(self, item, spider):
-        if self.db[spider.name].find_one({
+        if not self.db[spider.name].find_one({
                 '_id': item['_id'],
-                'final_result': False
+                'final_result': True
         }):
+            print('!!!', item['_id'], item['sell'])
             self.db[spider.name].update_one(
                 {'_id': item['_id']},
                 {'$set': item},
