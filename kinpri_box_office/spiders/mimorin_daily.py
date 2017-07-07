@@ -84,6 +84,10 @@ class MimorinDailySpider(scrapy.Spider):
                 int_list = map(int, map(lambda x: x.replace('*', ''),
                                         line[:3] + line[4:5]))
                 rank, total_seat, show_num, theater_num = map(int, int_list)
+
+                # adjust error
+                show_num = round(show_num * 1.03)
+
                 item = dict(
                     rank=rank,
                     sell=0,
